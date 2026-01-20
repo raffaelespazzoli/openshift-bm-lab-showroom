@@ -1,0 +1,406 @@
+= Module 1: Infrastructure preparation
+:source-highlighter: rouge
+:toc: macro
+:toclevels: 1
+
+ACME Corp's platform engineering team needs to deploy OpenShift on bare metal infrastructure to support high-performance VM and AI workloads. You've been tasked with preparing and validating the infrastructure before beginning the installation process.
+
+In this module, you'll examine the pre-configured lab environment, understand the network architecture, and validate that all prerequisites are in place for a successful OpenShift bare metal installation.
+
+== Learning objectives
+
+By the end of this module, you'll be able to:
+
+* Identify and verify bare metal infrastructure components required for OpenShift deployment
+* Understand the four-network architecture used in bare metal OpenShift environments
+* Validate that infrastructure services (DNS, NTP, storage, BMC) are operational
+* Prepare the bastion host environment for agent-based installation
+
+== Exercise 1: Explore the lab infrastructure
+
+ACME Corp has provisioned bare metal infrastructure for your OpenShift deployment. You need to understand the environment layout, network configuration, and available resources before proceeding with installation.
+
+Let's start by connecting to the bastion host and exploring the pre-configured infrastructure.
+
+. Connect to the bastion host using SSH:
++
+[source,bash,subs="attributes"]
+----
+ssh -p {bastion_ssh_port} {bastion_ssh_user_name}@{bastion_public_hostname}
+----
++
+When prompted, enter the password: `{bastion_ssh_password}`
+
+. Once connected, verify the bastion host configuration:
++
+[source,bash]
+----
+hostname
+uname -a
+----
++
+You should see the bastion hostname and Red Hat Enterprise Linux kernel information.
+
+. Check available infrastructure services on the bastion network:
++
+[source,bash]
+----
+# List network interfaces
+ip addr show
+
+# Check DNS configuration
+cat /etc/resolv.conf
+----
++
+The bastion host should have connectivity to multiple networks, including the management network (192.168.3.x).
+
+. Review the lab environment architecture:
++
+The lab environment consists of several key components:
++
+* **Bastion host**: Your current location, used for installation and management
+* **Bare metal nodes**: Virtual machines simulating physical servers (nodes for the OpenShift cluster)
+* **Network services**: DNS, NTP, HTTP proxy for external connectivity
+* **Storage server**: Provides persistent storage via iSCSI
+* **BMC simulation**: kubevirt-redfish provides Redfish API for virtual media mounting
+
+image::lab-environment-architecture.png[Lab Environment Architecture,link=self,window=blank,width=800,title="Complete lab infrastructure showing bastion, nodes, and network services"]
+
+=== Network architecture overview
+
+The lab uses a four-network design commonly found in production bare metal deployments:
+
+[cols="1,2,2"]
+|===
+| Network | CIDR | Purpose
+
+| **Management (M)**
+| 192.168.0.0/24
+| Bare metal nodes, cluster API, ingress
+
+| **Storage (ST)**
+| 192.168.1.0/24
+| Storage traffic (iSCSI, persistent volumes)
+
+| **Networking (NM)**
+| 192.168.3.0/24
+| Infrastructure services (bastion, DNS, NTP, proxy)
+
+| **VM**
+| Dedicated
+| Virtual machine workloads (OpenShift Virtualization)
+|===
+
+**Key IP addresses**:
+
+* **API VIP**: 192.168.0.9 - Kubernetes API server load balancer endpoint
+* **Ingress VIP**: 192.168.0.10 - Application routes and OpenShift web console
+
+. Verify DNS resolution for critical cluster endpoints:
++
+[source,bash]
+----
+# Verify API endpoint resolution
+nslookup api.cluster-{guid}.dynamic.redhatworkshops.io
+
+# Verify ingress wildcard resolution
+nslookup test.apps.cluster-{guid}.dynamic.redhatworkshops.io
+----
++
+These DNS records must resolve correctly before installation begins.
+
+=== Verify infrastructure services
+
+. Check NTP synchronization:
++
+[source,bash]
+----
+chronyc tracking
+chronyc sources
+----
++
+Expected output should show NTP synchronized with low offset (< 100ms).
+
+. Verify HTTP proxy configuration (if applicable):
++
+[source,bash]
+----
+echo $HTTP_PROXY
+echo $HTTPS_PROXY
+curl -I https://quay.io
+----
++
+The proxy should allow connectivity to external registries for pulling container images.
+
+. Confirm storage server accessibility:
++
+[source,bash]
+----
+ping -c 3 192.168.1.2
+----
++
+The storage server should be reachable on the storage network.
+
+=== Verify
+
+At this point, you should have:
+
+* Successfully connected to the bastion host
+* Identified the four-network architecture
+* Confirmed DNS resolution for API and ingress endpoints
+* Verified NTP synchronization
+* Validated connectivity to storage and external registries
+
+If any of these checks fail, revisit the verification steps before proceeding to Exercise 2.
+
+== Exercise 2: Validate bare metal node readiness
+
+Now that you understand the overall infrastructure, you need to validate that the bare metal nodes are accessible and ready for OpenShift installation. These nodes will become the control plane and worker nodes in your cluster.
+
+. Explore the kubevirt-redfish BMC simulation:
++
+The lab uses kubevirt-redfish to simulate baseboard management controller (BMC) functionality. This allows virtual media mounting and power control via the Redfish API.
++
+[source,bash]
+----
+# Check kubevirt-redfish service
+curl -k https://{bastion_public_hostname}:8000/redfish/v1/Systems
+----
++
+You should see a JSON response listing available systems (bare metal nodes).
+
+. List available bare metal nodes:
++
+[source,bash]
+----
+# Get detailed node information
+curl -k https://{bastion_public_hostname}:8000/redfish/v1/Systems | jq '.Members'
+----
++
+The output shows URLs for each node's Redfish endpoint. These will be used during installation to mount the installation ISO.
+
+. Check a specific node's power state and configuration:
++
+[source,bash]
+----
+# Example: Check node 1
+curl -k https://{bastion_public_hostname}:8000/redfish/v1/Systems/node01 | jq '.PowerState, .Boot'
+----
++
+The node should show its current power state and boot configuration.
+
+. Review the network configuration for bare metal nodes:
++
+Each bare metal node has network interfaces connected to multiple VLANs:
++
+* **Management network** (192.168.0.x): Cluster control plane and API communication
+* **Storage network** (192.168.1.x): iSCSI and persistent volume traffic
+* **VM network**: Dedicated for virtual machine workloads
+
+. Verify that installation prerequisites are in place:
++
+[source,bash]
+----
+# Check for installation manifests directory
+ls -la ~/bm-lab-installation/
+
+# Verify Helm is available for manifest generation
+helm version
+----
++
+The installation manifests directory may not exist yet, this is normal. You'll create it in Module 2.
+
+=== Verify
+
+Confirm the following before moving to Module 2:
+
+* BMC Redfish API is accessible and returns node information
+* You can query node power state and boot configuration
+* You understand the network interfaces each node will use
+* Installation tools (Helm, curl, jq) are available on bastion
+
+=== What you've learned
+
+In this exercise, you validated that:
+
+* The bare metal nodes are accessible via Redfish API
+* BMC simulation is functional for virtual media mounting
+* Network connectivity is established for all required networks
+* The bastion host has the necessary tools for installation
+
+== Troubleshooting
+
+**Issue**: SSH connection to bastion fails with "Connection timed out"
+
+**Solution**:
+
+. Verify you're using the correct hostname and port:
++
+[source,bash,subs="attributes"]
+----
+# Correct connection command
+ssh -p {bastion_ssh_port} {bastion_ssh_user_name}@{bastion_public_hostname}
+----
+
+. Check network connectivity:
++
+[source,bash,subs="attributes"]
+----
+ping {bastion_public_hostname}
+telnet {bastion_public_hostname} {bastion_ssh_port}
+----
+
+. If connectivity fails, verify your network allows outbound SSH on the specified port.
+
+**Issue**: DNS resolution fails for cluster endpoints
+
+**Solution**:
+
+. Check DNS server configuration:
++
+[source,bash]
+----
+cat /etc/resolv.conf
+----
+
+. Verify DNS server is reachable:
++
+[source,bash]
+----
+ping -c 3 $(grep nameserver /etc/resolv.conf | awk '{print $2}' | head -1)
+----
+
+. Test manual DNS query:
++
+[source,bash]
+----
+dig @192.168.3.3 api.cluster-{guid}.dynamic.redhatworkshops.io
+----
+
+. If DNS is not responding, contact the instructor or check that DNS services are running on the infrastructure network.
+
+**Issue**: Redfish API returns 404 or connection errors
+
+**Solution**:
+
+. Verify kubevirt-redfish service is running:
++
+[source,bash]
+----
+systemctl status kubevirt-redfish
+----
+
+. Check service logs for errors:
++
+[source,bash]
+----
+journalctl -u kubevirt-redfish -n 50
+----
+
+. Confirm the correct Redfish API URL:
++
+[source,bash,subs="attributes"]
+----
+curl -k https://{bastion_public_hostname}:8000/redfish/v1/
+----
+
+. If the service is not running, restart it:
++
+[source,bash]
+----
+sudo systemctl restart kubevirt-redfish
+----
+
+**Issue**: NTP is not synchronized
+
+**Solution**:
+
+. Check chrony service status:
++
+[source,bash]
+----
+systemctl status chronyd
+----
+
+. Force NTP synchronization:
++
+[source,bash]
+----
+sudo chronyc makestep
+chronyc tracking
+----
+
+. Verify NTP server accessibility:
++
+[source,bash]
+----
+chronyc sources -v
+----
+
+. If NTP servers are unreachable, check network connectivity to 192.168.3.4 or configure alternate NTP sources.
+
+**Issue**: Storage server (192.168.1.2) is unreachable
+
+**Solution**:
+
+. Check network interface configuration:
++
+[source,bash]
+----
+ip route show
+ip addr show
+----
+
+. Verify routing to storage network:
++
+[source,bash]
+----
+traceroute 192.168.1.2
+----
+
+. Test connectivity from a different interface:
++
+[source,bash]
+----
+ping -I <storage-interface> 192.168.1.2
+----
+
+. If routing is incorrect, contact the instructor to verify network configuration.
+
+== Learning outcomes
+
+By completing this module, you should now understand:
+
+* ✓ The components and architecture of a bare metal OpenShift lab environment
+* ✓ The four-network design used in production bare metal deployments (Management, Storage, Networking, VM)
+* ✓ How to validate infrastructure services (DNS, NTP, BMC) before installation
+* ✓ The role of Redfish API in managing bare metal hardware for OpenShift deployment
+
+== Module summary
+
+You've successfully completed infrastructure preparation for ACME Corp's bare metal OpenShift deployment.
+
+**What you accomplished**:
+
+* Connected to the bastion host and explored the lab environment
+* Understood the four-network architecture (Management, Storage, Networking, VM)
+* Validated DNS resolution for critical cluster endpoints (API VIP, Ingress VIP)
+* Verified infrastructure services: NTP synchronization, proxy connectivity, storage access
+* Confirmed bare metal node accessibility via Redfish BMC API
+* Validated that installation tools and prerequisites are in place
+
+**Key takeaways**:
+
+* Bare metal OpenShift requires careful infrastructure preparation and network planning
+* The four-network design separates control plane, storage, infrastructure services, and VM traffic
+* DNS and NTP must be properly configured before installation begins
+* Redfish API provides programmatic control over bare metal hardware for automated installation
+* Proper validation prevents installation failures and reduces troubleshooting time
+
+**Next steps**:
+
+Module 2 will guide you through the actual OpenShift installation process, including manifest generation, ISO preparation, virtual media mounting, and installation monitoring. You'll use the infrastructure you validated in this module to deploy a production-ready multinode cluster.
+
+== Assets needed
+
+. `lab-environment-architecture.png` - Complete infrastructure diagram showing bastion, bare metal nodes, network services, storage, and the four-network architecture (Management, Storage, Networking, VM). Save to `content/modules/ROOT/assets/images/lab-environment-architecture.png`

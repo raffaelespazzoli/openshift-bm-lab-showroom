@@ -1,7 +1,10 @@
-* xref:module-01.adoc[1. RPM Native Container]
-** xref:module-01.adoc#repositories[Repositories]
-** xref:module-01.adoc#software[Software]
+* xref:index.adoc[Home]
 
-* xref:module-02.adoc[2. GitHub Sourced Container]
-** xref:module-02.adoc#prerequisites[Install Prerequisites]
-** xref:module-02.adoc#container[Enable Container]
+* xref:01-overview.adoc[Workshop overview]
+
+* xref:02-details.adoc[Workshop details]
+
+* xref:03-module-01-infrastructure-prep.adoc[Module 1: Infrastructure preparation]
+** xref:03-module-01-infrastructure-prep.adoc#exercise-1-explore-the-lab-infrastructure[Exercise 1: Explore the lab infrastructure]
+** xref:03-module-01-infrastructure-prep.adoc#exercise-2-validate-bare-metal-node-readiness[Exercise 2: Validate bare metal node readiness]
+** xref:03-module-01-infrastructure-prep.adoc#troubleshooting[Troubleshooting]

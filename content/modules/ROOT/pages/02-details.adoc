@@ -1,0 +1,215 @@
+= Workshop details
+:toc:
+:toc-placement: preamble
+:icons: font
+
+== Timing and schedule
+
+=== Full workshop (3 hours)
+
+* **Module 1**: Infrastructure Preparation (45 minutes)
+* **Module 2**: OpenShift Installation (2 hours)
+* **Module 3**: Post-Installation and Verification (30 minutes)
+
+=== Module breakdown
+
+**Module 1: Infrastructure Preparation (45 minutes)**
+
+* Review pre-configured lab infrastructure
+* Understand network architecture (4 networks: Management, Storage, Networking, VM)
+* Explore bare metal node configuration
+* Validate environment readiness
+
+**Module 2: OpenShift Installation (2 hours)**
+
+* Generate installation manifests using Helm templates
+* Prepare agent-based installation ISO
+* Mount installation media via Redfish API
+* Monitor installation progress and bootstrap completion
+* Verify successful cluster deployment
+
+**Module 3: Post-Installation and Verification (30 minutes)**
+
+* Verify cluster health and node status
+* Access OpenShift web console and CLI
+* Verify storage access and configuration
+* Perform basic troubleshooting validation
+* Confirm platform readiness for workloads
+
+== Technical requirements
+
+=== Software versions
+
+* OpenShift: {ocp_version} (placeholder, uses environment-specific version)
+* RHEL CoreOS: Included with OpenShift installer
+* Helm: 3.x or later (for manifest generation)
+* OpenShift CLI (`oc`): Matches cluster version
+
+=== Environment access
+
+Participants will have access to:
+
+* **Bastion host**: Central management node for installation operations
+** Hostname: {bastion_public_hostname}
+** SSH port: {bastion_ssh_port}
+** Username: {bastion_ssh_user_name}
+** Password: {bastion_ssh_password}
+
+* **Bare metal nodes**: Pre-configured virtual machines simulating physical servers
+** Management network: 192.168.0.0/24
+** Storage network: 192.168.1.0/24
+** Networking services network: 192.168.3.0/24
+** VM network: Dedicated for virtualization workloads
+
+* **Infrastructure services**:
+** DNS server for cluster name resolution
+** NTP server for time synchronization
+** HTTP proxy for external connectivity
+** Storage server with iSCSI
+
+* **Post-installation access**:
+** OpenShift Console: {openshift_cluster_console_url}
+** Admin username: {openshift_cluster_admin_username}
+** Admin password: {openshift_cluster_admin_password}
+
+=== Network architecture
+
+The lab environment uses 4 distinct networks:
+
+[cols="1,2,2,3"]
+|===
+| Network | CIDR | Gateway | Purpose
+
+| **M** (Management)
+| 192.168.0.0/24
+| 192.168.0.1
+| Bare metal node management and cluster API
+
+| **ST** (Storage)
+| 192.168.1.0/24
+| 192.168.1.1
+| Storage traffic (iSCSI, persistent volumes)
+
+| **NM** (Networking)
+| 192.168.3.0/24
+| 192.168.3.1
+| Infrastructure services (bastion, DNS, NTP)
+
+| **VM** (Virtual Machines)
+| N/A
+| N/A
+| Dedicated network for VM workloads
+|===
+
+**Key virtual IPs**:
+
+* API VIP: 192.168.0.9 (Kubernetes API endpoint)
+* Ingress VIP: 192.168.0.10 (Application routes and console)
+
+== Environment setup
+
+=== Pre-workshop checklist
+
+The lab environment is pre-configured with:
+
+□ **Bastion host ready** - Management node with required tools installed
+
+□ **Bare metal nodes provisioned** - Virtual machines simulating physical servers
+
+□ **Network services running** - DNS, NTP, proxy, and storage configured
+
+□ **BMC simulation active** - Redfish API endpoints for virtual media mounting
+
+□ **Installation prerequisites met** - Manifests, credentials, and configurations prepared
+
+=== Setup validation
+
+At the start of Module 1, you'll validate environment readiness:
+
+. **SSH connectivity to bastion**:
++
+[source,bash]
+----
+ssh -p {bastion_ssh_port} {bastion_ssh_user_name}@{bastion_public_hostname}
+----
+
+. **Network service availability**:
++
+[source,bash]
+----
+# Verify DNS resolution
+nslookup api.cluster.example.com
+
+# Verify NTP synchronization
+chronyc tracking
+----
+
+. **Bare metal node accessibility**:
++
+[source,bash]
+----
+# Check Redfish BMC endpoints
+curl -k https://node01-bmc.example.com/redfish/v1/Systems
+----
+
+== Troubleshooting guide
+
+=== Common setup issues
+
+**Problem**: "SSH connection refused or timeout"
+
+→ **Solution**: Verify bastion hostname and SSH port. Ensure network connectivity from your location. Check that SSH service is running on bastion.
+
+**Problem**: "DNS resolution failures"
+
+→ **Solution**: Confirm DNS server is accessible from bastion. Check `/etc/resolv.conf` for correct DNS configuration. Validate DNS records for cluster endpoints.
+
+**Problem**: "Unable to access Redfish BMC endpoints"
+
+→ **Solution**: Verify kubevirt-redfish service is running. Check BMC URLs and credentials. Ensure network connectivity from bastion to BMC network.
+
+**Problem**: "Installation manifests not found"
+
+→ **Solution**: Verify Helm template generation completed successfully. Check manifest directory location. Confirm all required YAML files are present.
+
+=== During workshop support
+
+* Detailed troubleshooting steps are included in each module
+* Module 1 focuses on infrastructure validation and readiness
+* Module 2 includes installation monitoring and common failure scenarios
+* Module 3 provides cluster verification and health check procedures
+
+== Follow-up resources
+
+=== Next steps for participants
+
+* **link:https://docs.redhat.com/en/documentation/openshift_container_platform/{ocp_version}/html/installing/index^[OpenShift Installation Documentation]**: Official installation guides for various platforms
+* **link:https://docs.openshift.com/container-platform/{ocp_version}/installing/installing_bare_metal_ipi/ipi-install-overview.html^[Bare Metal IPI Documentation]**: In-depth bare metal installation methods
+* **link:https://access.redhat.com/solutions^[Red Hat Customer Portal]**: Knowledge base articles and support resources
+* **link:https://developers.redhat.com/^[Red Hat Developer]**: Learning paths and additional workshops
+
+=== Additional learning paths
+
+* **Intermediate**: OpenShift Virtualization deployment and VM migration
+* **Advanced**: Multi-cluster management with Red Hat Advanced Cluster Management
+* **Specialized**: GPU enablement for AI/ML workloads on OpenShift
+
+=== Related workshops
+
+* **OpenShift Virtualization**: Migrate and manage VMs on OpenShift
+* **OpenShift AI**: Deploy AI/ML workloads and models
+* **GitOps with OpenShift**: Automated cluster and application management
+
+== Authors and contributors
+
+**Workshop**: OpenShift Bare Metal Deployment
+
+**Target Audience**: Platform Engineers, Red Hat Consultants, Red Hat Specialists
+
+**Duration**: 3 hours
+
+**Last Updated**: January 2026
+
+**Workshop Version**: 1.0
+
+**Lab Environment**: Red Hat Demo Platform (RHDP)

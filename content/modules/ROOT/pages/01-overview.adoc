@@ -1,0 +1,97 @@
+= Workshop overview
+:toc:
+:toc-placement: preamble
+:icons: font
+
+== Your role and mission
+
+You're a platform engineer at ACME Corp, and you've been assigned a critical infrastructure project.
+
+ACME needs to deploy OpenShift on bare metal infrastructure to create a high-performance platform capable of running both virtual machines and AI/ML workloads. Your manager has explained, "We need dedicated bare metal infrastructure to meet our performance requirements for AI model training and high-throughput VM workloads. Cloud resources won't cut it for our use case."
+
+**Your assignment**: Deploy a production-ready OpenShift cluster on bare metal infrastructure that can support ACME's virtualization and AI workload requirements.
+
+**The objective**: Demonstrate that you can successfully install, configure, and validate an OpenShift cluster on bare metal infrastructure, preparing it for ACME's demanding workload needs.
+
+== Success criteria for your mission
+
+By the end of this workshop, you'll have practical bare metal deployment skills to address ACME's infrastructure challenges:
+
+* Understand bare metal infrastructure requirements and network architecture for OpenShift → **ensure proper infrastructure planning and capacity**
+* Configure network settings for multinode bare metal clusters → **enable proper cluster connectivity and service accessibility**
+* Deploy a production-ready OpenShift cluster using agent-based installation → **demonstrate successful cluster deployment on physical hardware**
+* Verify cluster health, storage access, and operational readiness → **confirm platform readiness for production workloads**
+
+**Technical outcome**: You'll have hands-on experience deploying OpenShift on bare metal infrastructure that directly applies to ACME's production deployment needs.
+
+**Business benefit**: Proven deployment capability that enables high-performance VM and AI workloads on dedicated infrastructure.
+
+== Target audience
+
+This workshop is designed for:
+
+* Platform engineers responsible for OpenShift infrastructure deployment
+* Red Hat Consultants implementing bare metal OpenShift solutions
+* Red Hat Specialists supporting customer bare metal deployments
+* Technical professionals evaluating bare metal OpenShift for performance-critical workloads
+
+== What you need to succeed
+
+You should have:
+
+* Intermediate knowledge of OpenShift architecture and components
+* Familiarity with Linux command line and SSH operations
+* Understanding of networking concepts (DNS, DHCP, VLANs, routing)
+* Experience with virtualization concepts (beneficial but not required)
+
+== ACME Corporation's infrastructure challenges
+
+**The situation**: ACME Corporation needs to deploy a high-performance container platform to support both virtual machine consolidation and emerging AI/ML workloads.
+
+**Project timeline**: Deploy a production-ready OpenShift cluster on bare metal infrastructure within the current project cycle.
+
+**Current challenges** (operational pain points):
+
+* **Performance requirements**: AI model training and inference require dedicated hardware resources → cloud-based solutions cannot provide consistent performance or cost-effectiveness at scale
+* **VM consolidation needs**: Legacy virtualization infrastructure needs modernization → ACME wants to consolidate VM workloads onto OpenShift Virtualization for unified management
+* **Infrastructure complexity**: Bare metal deployment requires careful network planning and hardware configuration → incorrect setup leads to extended troubleshooting and delayed go-live dates
+* **Skills gap**: Traditional VM administrators need to learn bare metal OpenShift deployment → lack of hands-on experience with agent-based installation creates project risk
+
+**The opportunity**: OpenShift on bare metal provides the dedicated infrastructure performance ACME needs while enabling modern platform capabilities for both containers and virtual machines.
+
+**Technical perspective**: "We know OpenShift runs great in the cloud, but our AI workloads need GPU access and predictable performance. We need to prove we can successfully deploy and manage OpenShift on our own bare metal infrastructure."
+
+== Your vision of success
+
+If this bare metal deployment succeeds for ACME's use case, here's the potential technical improvements:
+
+**Immediate improvements** (short-term):
+
+* **Dedicated performance**: Direct hardware access eliminates noisy neighbor problems → consistent performance for AI model training and inference
+* **Cost optimization**: Owning infrastructure for high-utilization workloads → reduced cloud egress fees and per-hour compute costs
+
+**Strategic benefits** (longer-term):
+
+* **Unified platform**: Consolidate containers, VMs, and AI workloads → reduced operational complexity and unified management
+* **Hardware flexibility**: Support specialized hardware like GPUs and high-speed networking → enable advanced AI and HPC workloads
+* **Edge deployment capability**: Proven bare metal deployment skills → enables future edge computing and distributed infrastructure projects
+
+**Success metric**: A fully operational OpenShift cluster running on bare metal that passes all health checks and is ready to accept VM and AI workloads, demonstrating ACME's capability to deploy and manage production infrastructure.
+
+== Common questions
+
+**"Why bare metal instead of cloud or virtualized infrastructure?"**
+
+→ Bare metal provides dedicated hardware resources essential for high-performance AI/ML workloads and eliminates hypervisor overhead for maximum efficiency.
+
+**"What's different about bare metal OpenShift deployment compared to cloud?"**
+
+→ You'll manage hardware provisioning, network configuration, and BMC integration. Module 1 covers infrastructure preparation, and Module 2 walks through agent-based installation.
+
+**"How do we handle hardware failures in production?"**
+
+→ OpenShift provides resilience through node redundancy and workload distribution. Module 3 covers cluster validation and operational readiness.
+
+**"Can we mix bare metal nodes with virtualized or cloud nodes?"**
+
+→ Yes, OpenShift supports hybrid deployments. This workshop focuses on pure bare metal, establishing the foundation for future hybrid architectures.

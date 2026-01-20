@@ -1,6 +1,6 @@
 ---
 site:
-  title: Showroom Template Demo
+  title: OpenShift Bare Metal Deployment
   url: https://github.com/rhpds/showroom_template_nookbag
   start_page: modules::index.adoc
 
